@@ -6,10 +6,10 @@ The application takes the input text file's absolute name as a command line argu
 
 2. Enter the following command to compile the application:
 
-**csc Program.cs**
+    **csc Program.cs**
 
 3. An executable file that's named **Program.exe** is created.
 
 4. Enter the following command to see the output:
 
-**Program path-to-input-text-file**
+   **Program path-to-input-text-file**
