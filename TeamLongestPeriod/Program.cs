@@ -19,12 +19,13 @@ namespace TeamLongestPeriod
         
 
     }
-    public static class LongestPeriodCalculations
+    public class LongestPeriodCalculations
     {
-        public static Record[] ExtractData(string textfilePath)
+        public Record[] Records { get; set; } 
+        public LongestPeriodCalculations(string textfilePath)
         {
             string[] lines = System.IO.File.ReadAllLines(textfilePath);
-            Record[] records = new Record[lines.Length];
+            Records = new Record[lines.Length];
 
             for (int i = 0; i < lines.Length; i++)
             {
@@ -44,17 +45,16 @@ namespace TeamLongestPeriod
                 else
                     r.DateTo = DateTime.Parse(data[3]);
 
-                records[i] = r;
+                Records[i] = r;
             }
 
-            return records;
         }
 
         //returns the pair of the EmpIDs of the both employees who have worked on common projects the longest time
-        public static KeyValuePair<int,int> TeamLongestPeriod(Record[] records)
+        public KeyValuePair<int,int> TeamLongestPeriod()
         {
             List<int> employees = new List<int>();
-            foreach (Record rec in records)
+            foreach (Record rec in Records)
                 if (!employees.Contains(rec.EmpID))
                     employees.Add(rec.EmpID);
            
@@ -64,7 +64,7 @@ namespace TeamLongestPeriod
             for (int emp1 = 0; emp1 < employees.Count; emp1++)
                 for (int emp2 = emp1 + 1; emp2 < employees.Count; emp2++)
                 {
-                    TimeSpan currPairTeamPeriod = TotalTeamPeriod(employees[emp1], employees[emp2], records);
+                    TimeSpan currPairTeamPeriod = TotalTeamPeriod(employees[emp1], employees[emp2]);
                     if (currPairTeamPeriod > maxPeriod)
                     {
                         maxPeriod = currPairTeamPeriod;
@@ -78,18 +78,18 @@ namespace TeamLongestPeriod
         }
 
       
-         static TimeSpan TotalTeamPeriod(int emp1, int emp2, Record[] recs)
+        TimeSpan TotalTeamPeriod(int emp1, int emp2)
         {
             TimeSpan total = TimeSpan.Zero;
-            List<int> projectsEmp1 = EmployeeProjects(emp1, recs);
-            List<int> projectsEmp2 = EmployeeProjects(emp2, recs);
+            List<int> projectsEmp1 = EmployeeProjects(emp1);
+            List<int> projectsEmp2 = EmployeeProjects(emp2);
 
             var intersectionProjects = projectsEmp1.Intersect(projectsEmp2);
 
             foreach(int proj in intersectionProjects)
             {
-                List<Record> recordsEmp1 = FindRecords(emp1, proj, recs);
-                List<Record> recordsEmp2 = FindRecords(emp2, proj, recs);
+                List<Record> recordsEmp1 = FindRecords(emp1, proj);
+                List<Record> recordsEmp2 = FindRecords(emp2, proj);
 
                 foreach(Record rec1 in recordsEmp1)
                     foreach(Record rec2 in recordsEmp2)
@@ -100,7 +100,7 @@ namespace TeamLongestPeriod
             return total;
         }
         
-        static TimeSpan PeriodOverlap(Record rec1, Record rec2)
+        TimeSpan PeriodOverlap(Record rec1, Record rec2)
         {
             if(rec2.DateTo >= rec1.DateFrom && rec2.DateTo <= rec1.DateTo)
             {
@@ -120,21 +120,21 @@ namespace TeamLongestPeriod
 
             return TimeSpan.Zero;
         }
-         static List<int> EmployeeProjects(int employee, Record[] recs)
+        List<int> EmployeeProjects(int employee)
         {
             List<int> empProjects = new List<int>();
-            foreach (Record rec in recs)
+            foreach (Record rec in Records)
                 if (rec.EmpID == employee && !empProjects.Contains(rec.ProjectID))
                     empProjects.Add(rec.ProjectID);
 
             return empProjects;
         }
 
-         static List<Record> FindRecords(int employee, int project, Record[] recs)
+        List<Record> FindRecords(int employee, int project)
         {
             List<Record> records = new List<Record>();
 
-            foreach (Record rec in recs)
+            foreach (Record rec in Records)
                 if (rec.EmpID == employee && rec.ProjectID == project)
                     records.Add(rec);
 
@@ -154,15 +154,16 @@ namespace TeamLongestPeriod
                 
                 return 1;
             }
-            Record[] recs = LongestPeriodCalculations.ExtractData(args[0]);
+
+            LongestPeriodCalculations l = new LongestPeriodCalculations(args[0]);
 
             Console.WriteLine("EmpID,  ProjectID,  DateFrom,  DateTo,  Span");
-            foreach(Record rec in recs)
+            foreach(Record rec in l.Records)
             {
                 Console.WriteLine(rec);
             }
 
-            KeyValuePair<int, int> teamLongestPair = LongestPeriodCalculations.TeamLongestPeriod(recs);
+            KeyValuePair<int, int> teamLongestPair = l.TeamLongestPeriod();
             Console.WriteLine("Employee 1: {0}", teamLongestPair.Key);
             Console.WriteLine("Employee 2: {0}", teamLongestPair.Value);
 
