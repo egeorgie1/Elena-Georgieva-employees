@@ -1,4 +1,4 @@
-# Elena-Georgieva-employees
+# Employees
 
 The application takes the input text file's absolute name as a command line argument. Steps for running the program:
 
